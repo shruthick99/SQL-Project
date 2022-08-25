@@ -1,35 +1,18 @@
-DROP TABLE IF EXISTS gym_inventory;
 
-CREATE TABLE gym_inventory (
-  ProductID varchar(8) ,
-  EquipmentName varchar(50) NOT NULL,
-  ProductCategory varchar(50) DEFAULT NULL,
-  Brand varchar(50) DEFAULT NULL,
-  LastMaintenance date DEFAULT NULL,
-  MaintenanceCycle varchar(20),
-  PRIMARY KEY (ProductID));
-  
-DROP TABLE IF EXISTS nutrition_inventory;
 
-CREATE TABLE nutrition_inventory (
+DROP TABLE IF EXISTS inventory;
+
+CREATE TABLE inventory (
   ProductID varchar(8) ,
   ProductName varchar(50) NOT NULL,
   ProductCategory varchar(50) DEFAULT NULL,
+  ProductType enum('gym','nutrition','misc'),
   Brand varchar(50) DEFAULT NULL,
-  ExpiryDate date DEFAULT NULL,
-  mrp decimal(15,2) DEFAULT '0.00',
+  Replace_or_renew date DEFAULT NULL,
   PRIMARY KEY (ProductID));
-  
-DROP TABLE IF EXISTS maintenance_inventory;
 
-CREATE TABLE maintenance_inventory (
-  ProductID varchar(8) ,
-  ProductName varchar(50) NOT NULL,
-  ProductCategory varchar(50) DEFAULT NULL,
-  Brand varchar(50) DEFAULT NULL,
-  ExpiryDate date DEFAULT NULL,
-  PRIMARY KEY (ProductID));
-  
+
+
 DROP TABLE IF EXISTS ProductMasterList;
 
 CREATE TABLE ProductMasterList (
@@ -37,19 +20,27 @@ CREATE TABLE ProductMasterList (
   ProductName varchar(50) NOT NULL,
   ProductCategory varchar(50) DEFAULT NULL
   );
+ 
+
   
 DROP TABLE IF EXISTS Supplier_Billing;
 
 create table Supplier_Billing(
 Vendor_Name VARCHAR(20) NOT NULL,
 Invoice_number VARCHAR(20), 
-ProductID varchar(8), FOREIGN KEY (ProductID) REFERENCES ProductMasterList(ProductID),
 Invoice_date DATE, 
 Invoice_Total DECIMAL, 
 Payment_Total DECIMAL, 
 Credit_total DECIMAL, 
 Due_date DATE, 
 Payment_date DATE,
+PRIMARY KEY (Invoice_number));
+
+DROP TABLE IF EXISTS Invoice_Product;
+
+create table Invoice_Product(
+Invoice_number VARCHAR(20), FOREIGN KEY (Invoice_number) REFERENCES Supplier_Billing(Invoice_number),
+ProductID varchar(8), FOREIGN KEY (ProductID) REFERENCES ProductMasterList(ProductID),
 PRIMARY KEY (Invoice_number,ProductID));
   
 DROP TABLE IF EXISTS employees;
@@ -116,6 +107,12 @@ CREATE TABLE Customer (
   PRIMARY KEY (Customer_ID));
 
 
+DROP TABLE IF EXISTS ALLERGY_TYPE;
+CREATE TABLE ALLERGY_TYPE (
+ALLERGY_ID INT NOT NULL,
+ALLERGY_TYPE VARCHAR (25) NOT NULL,
+PRIMARY KEY (ALLERGY_ID)) ;
+
 DROP TABLE IF EXISTS CustomerHealth;
  
 CREATE TABLE CustomerHealth (
@@ -123,20 +120,13 @@ CREATE TABLE CustomerHealth (
   Height decimal(5,2) DEFAULT NULL,
   Weight decimal(5,2) DEFAULT NULL,
   PRIMARY KEY(Customer_ID));
-  
-DROP TABLE IF EXISTS ALLERGY_TYPE;
-CREATE TABLE ALLERGY_TYPE (
-ALLERGY_ID INT NOT NULL,
-ALLERGY_TYPE VARCHAR (25) NOT NULL,
-PRIMARY KEY (ALLERGY_ID)) ;
 
--- intersection table
 DROP TABLE IF EXISTS CUSTOMER_ALLERGY; 
 CREATE TABLE CUSTOMER_ALLERGY (
 Customer_ID int NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID),
 ALLERGY_ID INT NOT NULL, FOREIGN KEY(ALLERGY_ID) REFERENCES ALLERGY_TYPE(ALLERGY_ID),
 PRIMARY KEY (Customer_ID,ALLERGY_ID)) ;
-
+  
 DROP TABLE IF EXISTS CustomerTrainer;
 CREATE TABLE CustomerTrainer (
   Customer_ID int NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES  Customer(Customer_ID),
@@ -191,5 +181,18 @@ create table Customer_Booking(
  EntryID VARCHAR(20) not null, 
  Phone_Number varchar(10), 
  Date DATE,
- PurposeOfVisit enum('enquiry','workout session','shopping') not null
- );
+ PurposeOfVisit enum('enquiry','workout session','shopping') not null,
+ primary key(EntryID, date));
+ 
+
+drop table if exists unauthorized_users;
+ create table unauthorized_users(
+ EntryID VARCHAR(20) not null,
+ Date timestamp,
+ primary key(EntryID, date)
+ ); 
+ 
+
+ 
+ 
+ 
