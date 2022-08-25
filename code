@@ -1,0 +1,195 @@
+DROP TABLE IF EXISTS gym_inventory;
+
+CREATE TABLE gym_inventory (
+  ProductID varchar(8) ,
+  EquipmentName varchar(50) NOT NULL,
+  ProductCategory varchar(50) DEFAULT NULL,
+  Brand varchar(50) DEFAULT NULL,
+  LastMaintenance date DEFAULT NULL,
+  MaintenanceCycle varchar(20),
+  PRIMARY KEY (ProductID));
+  
+DROP TABLE IF EXISTS nutrition_inventory;
+
+CREATE TABLE nutrition_inventory (
+  ProductID varchar(8) ,
+  ProductName varchar(50) NOT NULL,
+  ProductCategory varchar(50) DEFAULT NULL,
+  Brand varchar(50) DEFAULT NULL,
+  ExpiryDate date DEFAULT NULL,
+  mrp decimal(15,2) DEFAULT '0.00',
+  PRIMARY KEY (ProductID));
+  
+DROP TABLE IF EXISTS maintenance_inventory;
+
+CREATE TABLE maintenance_inventory (
+  ProductID varchar(8) ,
+  ProductName varchar(50) NOT NULL,
+  ProductCategory varchar(50) DEFAULT NULL,
+  Brand varchar(50) DEFAULT NULL,
+  ExpiryDate date DEFAULT NULL,
+  PRIMARY KEY (ProductID));
+  
+DROP TABLE IF EXISTS ProductMasterList;
+
+CREATE TABLE ProductMasterList (
+  ProductID varchar(8) PRIMARY KEY,
+  ProductName varchar(50) NOT NULL,
+  ProductCategory varchar(50) DEFAULT NULL
+  );
+  
+DROP TABLE IF EXISTS Supplier_Billing;
+
+create table Supplier_Billing(
+Vendor_Name VARCHAR(20) NOT NULL,
+Invoice_number VARCHAR(20), 
+ProductID varchar(8), FOREIGN KEY (ProductID) REFERENCES ProductMasterList(ProductID),
+Invoice_date DATE, 
+Invoice_Total DECIMAL, 
+Payment_Total DECIMAL, 
+Credit_total DECIMAL, 
+Due_date DATE, 
+Payment_date DATE,
+PRIMARY KEY (Invoice_number,ProductID));
+  
+DROP TABLE IF EXISTS employees;
+CREATE TABLE employees (
+   EMPLOYEEID  int NOT NULL,
+   EMPFIRSTNAME  VARCHAR (25) DEFAULT NULL,
+  EMPLASTNAME  VARCHAR (25) DEFAULT NULL,
+  EMPSTREETADDRESS  VARCHAR (50) DEFAULT NULL,
+  EMPCITY  VARCHAR (30) DEFAULT NULL,
+  EMPSTATE  VARCHAR (2) DEFAULT NULL,
+  EMPZIPCODE  VARCHAR (10) DEFAULT NULL,
+  EMPSALARY  VARCHAR (8) DEFAULT NULL,
+  EmpPhoneNumber varchar(10) DEFAULT NULL,
+  EMPDATEHIRED  date DEFAULT NULL,
+  EMP_POSITION VARCHAR (30) NOT NULL,
+  PRIMARY KEY (EmployeeID));
+
+DROP TABLE IF EXISTS EMP_ATTENDANCE;
+CREATE TABLE EMP_ATTENDANCE (
+EMPLOYEEID INT NOT NULL, FOREIGN KEY (EMPLOYEEID) REFERENCES employees(EMPLOYEEID),
+DATE DATE DEFAULT NULL,
+TIMESTAMP_ENTRY datetime,
+TIMESTAMP_EXIT datetime,
+PRIMARY KEY (EMPLOYEEID,TIMESTAMP_ENTRY));
+
+DROP TABLE IF EXISTS EMPLOYEE_SCHEDULE;
+CREATE TABLE EMPLOYEE_SCHEDULE (
+EMPLOYEEID INT NOT NULL,
+DATE DATE NOT NULL,
+SHIFT ENUM('Morning','Evening') NOT NULL,
+PRIMARY KEY (EMPLOYEEID,DATE,SHIFT)); 
+
+DROP TABLE IF EXISTS WORKOUT_TYPE;
+CREATE TABLE WORKOUT_TYPE (
+WORKOUT_ID INT NOT NULL,
+WORKOUT_TYPE VARCHAR (25) NOT NULL,
+PRIMARY KEY (WORKOUT_ID)) ;
+
+DROP TABLE IF EXISTS EMPLOYEE_SPECIALIZATION;
+CREATE TABLE EMPLOYEE_SPECIALIZATION (
+EMPLOYEEID INT NOT NULL,
+WORKOUT_ID INT, FOREIGN KEY (WORKOUT_ID) REFERENCES WORKOUT_TYPE (WORKOUT_ID),
+PRIMARY KEY (EMPLOYEEID,WORKOUT_ID)) ;
+
+
+
+DROP TABLE IF EXISTS Customer;
+CREATE TABLE Customer (
+  Customer_ID int NOT NULL,
+  CustomerFirstName varchar(25) DEFAULT NULL,
+  CustomerLastname varchar(25) DEFAULT NULL,
+  CustomerStreetAddress varchar(50) DEFAULT NULL,
+  CustomerCity varchar(30) DEFAULT NULL,
+  CustomerState varchar(20) DEFAULT NULL,
+  CustomerZipCode varchar(5) DEFAULT NULL,
+  CustomerPhoneNumber varchar(10) DEFAULT NULL,
+  CustomerEmail varchar(50) DEFAULT NULL,
+  Gender enum('male','female','other') DEFAULT NULL,
+  Membership enum('1','4','6','12','18','24') DEFAULT NULL,
+  DateofJoining date DEFAULT NULL,
+  DateofLeaving date DEFAULT NULL,
+  DateofBirth date DEFAULT NULL, 
+  ActiveStatus enum('active','inactive') DEFAULT NULL,
+  PRIMARY KEY (Customer_ID));
+
+
+DROP TABLE IF EXISTS CustomerHealth;
+ 
+CREATE TABLE CustomerHealth (
+  Customer_ID int NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID),
+  Height decimal(5,2) DEFAULT NULL,
+  Weight decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY(Customer_ID));
+  
+DROP TABLE IF EXISTS ALLERGY_TYPE;
+CREATE TABLE ALLERGY_TYPE (
+ALLERGY_ID INT NOT NULL,
+ALLERGY_TYPE VARCHAR (25) NOT NULL,
+PRIMARY KEY (ALLERGY_ID)) ;
+
+-- intersection table
+DROP TABLE IF EXISTS CUSTOMER_ALLERGY; 
+CREATE TABLE CUSTOMER_ALLERGY (
+Customer_ID int NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID),
+ALLERGY_ID INT NOT NULL, FOREIGN KEY(ALLERGY_ID) REFERENCES ALLERGY_TYPE(ALLERGY_ID),
+PRIMARY KEY (Customer_ID,ALLERGY_ID)) ;
+
+DROP TABLE IF EXISTS CustomerTrainer;
+CREATE TABLE CustomerTrainer (
+  Customer_ID int NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES  Customer(Customer_ID),
+  EMPLOYEEID int NOT NULL, FOREIGN KEY (EMPLOYEEID) REFERENCES employees(EMPLOYEEID),
+  WORKOUT_ID INT, FOREIGN KEY (WORKOUT_ID) REFERENCES WORKOUT_TYPE (WORKOUT_ID),
+  PRIMARY KEY(Customer_ID,EMPLOYEEID));
+
+DROP TABLE IF EXISTS Challenges_Rewards;
+ 
+CREATE TABLE Challenges_Rewards (
+Challenge_ID int NOT NULL,
+Type int DEFAULT NULL, FOREIGN KEY (Type) REFERENCES workout_type(WORKOUT_ID),
+Start_date date,
+End_date date,
+Reward_first decimal(5,0) DEFAULT NULL,
+Reward_second decimal(5,0) DEFAULT NULL,
+Reward_third decimal(5,0) DEFAULT NULL,
+Winner_first int DEFAULT NULL, FOREIGN KEY (Winner_first) REFERENCES Customer(Customer_ID), 
+Winner_second int DEFAULT NULL, FOREIGN KEY (Winner_second) REFERENCES Customer(Customer_ID),
+Winner_third int DEFAULT NULL, FOREIGN KEY (Winner_third) REFERENCES Customer(Customer_ID),
+Organizer_employee int NOT NULL, FOREIGN KEY (Organizer_employee) REFERENCES employees(EMPLOYEEID),
+  PRIMARY KEY (Challenge_ID)
+  );
+
+
+
+drop table if exists Customer_Billing;
+create table Customer_Billing(
+Customer_ID INT NOT NULL, FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID), 
+ Invoice_amount DECIMAL,
+ Invoice_date DATE, 
+ Invoice_number INT NOT NULL, PRIMARY KEY(Invoice_number),
+ Payment_Total DECIMAL,
+ Credit_total DECIMAL,
+ Due_date DATE,
+ Payment_date DATE,
+ Discount float CHECK ( Discount>=0 AND Discount<=100));
+
+drop table if exists Customer_Booking;
+create table Customer_Booking(
+ Booking_ID VARCHAR(20) NOT NULL, PRIMARY KEY (Booking_ID) ,
+ booking_name VARCHAR(20) NOT NULL,
+ Email_ID VARCHAR(50) not null, 
+ Phone_Number varchar(10) not null, 
+ Booking_date DATE,
+ ValidTill_date DATE,
+ Booking_method ENUM('email', 'phone', 'in-person'), 
+ Trial_classes INT);
+ 
+ drop table if exists CustomerAttendance;
+ create table CustomerAttendance(
+ EntryID VARCHAR(20) not null, 
+ Phone_Number varchar(10), 
+ Date DATE,
+ PurposeOfVisit enum('enquiry','workout session','shopping') not null
+ );
