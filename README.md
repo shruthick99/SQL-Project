@@ -94,6 +94,11 @@ Screen shot of Physical Database objects
 
 ![Screenshot (93)](https://user-images.githubusercontent.com/110411394/186741484-a1e08cbd-ff95-4c00-ba95-2e5d5524fede.png)
 
+ER Diagram:
+
+![ER diagram](https://user-images.githubusercontent.com/110411394/186791506-59b5faef-4256-4859-9265-8c1ca0c77e9c.png)
+
+
 
 
 
